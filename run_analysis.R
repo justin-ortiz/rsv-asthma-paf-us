@@ -192,3 +192,41 @@ print(tornado, row.names = FALSE)
 write.csv(results,   "results_effect_estimates.csv", row.names = FALSE)
 write.csv(scenarios, "results_scenarios.csv",        row.names = FALSE)
 write.csv(tornado,   "results_one_way.csv",          row.names = FALSE)
+
+# Primary analysis, base case odds ratio. Point estimate from the
+# base case, interval from the 10,000 trials.
+
+draws <- cbind(nh_sim$n_exposed,
+               nh_sim$asthma_total,
+               nh_sim$asthma_if_none_exposed,
+               nh_sim$attributable,
+               100 * nh_sim$attributable_fraction,
+               100 * nh_sim$prev_unexposed,
+               100 * nh_sim$prev_exposed,
+               nh_sim$risk_ratio)
+
+primary <- data.frame(
+  quantity = c("RSV LRTI episodes", "all-cause asthma cases",
+               "cases if none exposed", "attributable cases",
+               "attributable fraction, %", "prevalence unexposed, %",
+               "prevalence exposed, %", "relative risk"),
+  point = c(nh_point$n_exposed, nh_point$asthma_total,
+            nh_point$asthma_if_none_exposed, nh_point$attributable,
+            100 * nh_point$attributable_fraction,
+            100 * nh_point$prev_unexposed,
+            100 * nh_point$prev_exposed, nh_point$risk_ratio),
+  lower = 0,
+  upper = 0)
+
+for (i in 1:8) {
+  primary$lower[i] <- quantile(draws[, i], 0.025)
+  primary$upper[i] <- quantile(draws[, i], 0.975)
+}
+
+cat("\nPRIMARY ANALYSIS\n\n")
+print(data.frame(quantity = primary$quantity,
+                 point = round(primary$point, 3),
+                 lower = round(primary$lower, 3),
+                 upper = round(primary$upper, 3)), row.names = FALSE)
+
+write.csv(primary, "results_primary.csv", row.names = FALSE)
