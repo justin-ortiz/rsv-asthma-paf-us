@@ -1,8 +1,8 @@
 # Reads one incidence workbook and saves the first-year encounter
 # counts the asthma model needs. Run once per workbook.
 #
-# Trials are matched across scenarios inside a workbook. They are not
-# matched across workbooks. Never subtract results from two workbooks.
+# Trials are matched across scenarios inside a workbook, not across
+# workbooks.
 #
 # Layout of the workbook, first sheet: six header rows, then the base
 # case row, then one row per trial. Each block of 36 columns holds
@@ -23,7 +23,10 @@ starts <- list(
                         "Hospitalizations" = 508))
 
 raw <- suppressMessages(suppressWarnings(as.data.frame(
-  read_excel(xlsx, col_names = FALSE, skip = 6, col_types = "numeric"))))
+  read_excel(xlsx, sheet = "Monte Carlo Simulation Results",
+             col_names = FALSE, skip = 6, col_types = "numeric"))))
+
+if (nrow(raw) != 10001) stop("Expected the base case row and 10,000 trials.")
 
 # Months 0 to 11 are the first year of life.
 first_year <- function(start) rowSums(raw[, start:(start + 11)])
@@ -31,11 +34,11 @@ first_year <- function(start) rowSums(raw[, start:(start + 11)])
 cached <- list()
 
 for (scenario in names(starts)) {
-  
+
   trials     <- 0
   point      <- 0
   by_setting <- list()
-  
+
   for (setting in names(starts[[scenario]])) {
     s        <- first_year(starts[[scenario]][[setting]])
     s_point  <- s[1]
@@ -44,7 +47,7 @@ for (scenario in names(starts)) {
     trials <- trials + s_trials
     point  <- point  + s_point
   }
-  
+
   cached[[scenario]] <- list(trials = trials, point = point,
                              by_setting = by_setting)
 }
