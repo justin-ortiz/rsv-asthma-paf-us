@@ -12,8 +12,9 @@ infection in the United States.
 The incidence workbook is not in this repository. Download
 `RSV_incidence_model_simulation_outputs_2026-08-28.zip` from
 https://doi.org/10.5281/zenodo.22797654, unzip it, and put
-`healthoutcomesnewsamples.xlsx` in the same folder as the R files. Run
-`cache_inputs.R` once, then `run_analysis.R`. Needs `readxl`.
+`RSV_incidence_50pct_coverage_base_waning.xlsx` in the same folder as
+the R files. Run `cache_inputs.R` once, then `run_analysis.R`. Needs
+`readxl`.
 
 Assumptions sit at the top of `run_analysis.R`. To add an effect
 estimate, add a row to the `effects` table.
