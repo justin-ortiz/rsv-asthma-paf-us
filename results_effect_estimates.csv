@@ -1,0 +1,6 @@
+"label","odds_ratio","risk_ratio","prev_unexposed","fraction","fraction_lower","fraction_upper","cases","cases_lower","cases_upper"
+"primary",3.02,2.621,0.07534,14.38,5.2,25.5,46372,16584,81967
+"published primary model",2.45,2.2,0.07827,11.06,1.7,23.8,35666,5271,76910
+"unconditional, asthma at age 6 or later",2.64,2.343,0.07725,12.22,4.9,20.8,39393,15648,67281
+"full dataset with three indicators",2.91,2.542,0.07588,13.77,5.1,24.2,44412,16149,78057
+"unconditional, all three conditions met",2.95,2.571,0.07568,14,4.3,25.9,45130,13886,83352
