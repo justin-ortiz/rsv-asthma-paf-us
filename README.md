@@ -39,7 +39,7 @@ file name.
         90% coverage, base waning          inputs_90pct.rds
 
 6. Run `run_analysis.R`. It prints the results and writes six CSV files
-   to the working folder. A new run overwrites them.
+   to the working folder. A new run overwrites them. The files in this repository are the results we report.
 
 The narrow case definition result is printed but not saved.
 
@@ -63,5 +63,4 @@ a US infant RSV lower respiratory tract infection incidence model
 under three nirsevimab scenarios. Zenodo, 2026.
 doi:10.5281/zenodo.22797654
 
-The original analysis code for this study is at
-github.com/MCFitz/RSV-asthma-US.
+The method follows the original analysis code for this study by Meagan Fitzpatrick, github.com/MCFitz/RSV-asthma-US.
