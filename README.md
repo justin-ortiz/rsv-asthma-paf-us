@@ -10,9 +10,10 @@ infection in the United States.
     compare_calibrations.R    prints the base case both ways
 
 The incidence workbook is not in this repository. Download
-`healthoutcomesnewsamples.xlsx` from ZENODO_DOI and put it in the same
-folder as the R files. Run `cache_inputs.R` once, then
-`run_analysis.R`. Needs `readxl`.
+`RSV_incidence_model_simulation_outputs_2026-08-28.zip` from
+https://doi.org/10.5281/zenodo.22797654, unzip it, and put
+`healthoutcomesnewsamples.xlsx` in the same folder as the R files. Run
+`cache_inputs.R` once, then `run_analysis.R`. Needs `readxl`.
 
 Assumptions sit at the top of `run_analysis.R`. To add an effect
 estimate, add a row to the `effects` table.
@@ -25,6 +26,11 @@ results can be reproduced. `compare_calibrations.R` prints both.
 
 Trials are matched across scenarios within one workbook and can be
 subtracted trial by trial. They are not matched across workbooks.
+
+Incidence data: Hutton D, Ortiz J. Monte Carlo simulation outputs from
+a US infant RSV lower respiratory tract infection incidence model
+under three nirsevimab scenarios. Zenodo, 2026.
+doi:10.5281/zenodo.22797654
 
 The original analysis code for this study is at
 github.com/MCFitz/RSV-asthma-US.
