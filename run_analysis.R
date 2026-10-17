@@ -9,7 +9,6 @@ set.seed(20261017)
 trials <- 10000
 
 input_cache <- "inputs.rds"
-scenario    <- "Natural History"
 
 pop_total <- 3664292          # NCHS 2021 births
 
@@ -45,13 +44,18 @@ effects <- data.frame(
 # Inputs
 
 inputs     <- readRDS(input_cache)
-encounters <- inputs$scenarios[[scenario]]
+encounters <- inputs$scenarios[["Natural History"]]
+
+for (s in names(inputs$scenarios)) {
+  if (length(inputs$scenarios[[s]]$trials) != trials)
+    stop("Expected ", trials, " trials in ", input_cache)
+}
 
 w_private  <- share_private  / (share_private + share_medicaid)
 w_medicaid <- share_medicaid / (share_private + share_medicaid)
 
 correction_point <- w_private  * episode_private  / visit_private +
-  w_medicaid * episode_medicaid / visit_medicaid
+                    w_medicaid * episode_medicaid / visit_medicaid
 
 correction_trials <-
   w_private  * rbeta(trials, episode_private + 1,
@@ -62,6 +66,7 @@ correction_trials <-
 n_exposed_point  <- encounters$point  * correction_point
 n_exposed_trials <- encounters$trials * correction_trials
 
+# Normal approximation to the reported prevalence interval.
 prev_total_trials <- rnorm(trials, prev_total,
                            (prev_total_upper - prev_total_lower) / (2 * 1.96))
 
@@ -69,10 +74,10 @@ prev_total_trials <- rnorm(trials, prev_total,
 # only by the effect estimate.
 z <- rnorm(trials)
 
-# Narrow case definition. Drawn after everything above so the other
-# results do not change.
+# Narrow case definition. These draws come last so the earlier draws
+# are unchanged.
 correction_point_narrow <- w_private  * episode_private_narrow  / visit_private_narrow +
-  w_medicaid * episode_medicaid_narrow / visit_medicaid_narrow
+                           w_medicaid * episode_medicaid_narrow / visit_medicaid_narrow
 
 correction_trials_narrow <-
   w_private  * rbeta(trials, episode_private_narrow + 1,
@@ -86,23 +91,23 @@ correction_trials_narrow <-
 results <- data.frame()
 
 for (i in 1:nrow(effects)) {
-  
+
   log_sd     <- (log(effects$upper[i]) - log(effects$lower[i])) / (2 * 1.96)
   odds_draws <- exp(log(effects$odds_ratio[i]) + log_sd * z)
-  
+
   cal_point <- prevalence_unexposed(effects$odds_ratio[i], prev_total,
                                     n_exposed_point / pop_total)
   base <- outcomes(n_exposed_point, pop_total,
                    cal_point$p0, cal_point$risk_ratio)
-  
+
   cal_sim <- prevalence_unexposed(odds_draws, prev_total_trials,
                                   n_exposed_trials / pop_total)
   sim <- outcomes(n_exposed_trials, pop_total,
                   cal_sim$p0, cal_sim$risk_ratio)
-  
+
   fraction <- interval(sim$attributable_fraction)
   cases    <- interval(sim$attributable)
-  
+
   results <- rbind(results, data.frame(
     label          = effects$label[i],
     odds_ratio     = effects$odds_ratio[i],
@@ -141,15 +146,15 @@ nh_sim   <- outcomes(n_exposed_trials, pop_total,
 scenarios <- data.frame()
 
 for (s in c("Nirsevimab", "RSVpreF")) {
-  
+
   s_point <- outcomes(unname(inputs$scenarios[[s]]$point) * correction_point,
                       pop_total, cal_point$p0, cal_point$risk_ratio)
   s_sim   <- outcomes(unname(inputs$scenarios[[s]]$trials) * correction_trials,
                       pop_total, cal_sim$p0, cal_sim$risk_ratio)
-  
+
   prevented <- nh_point$attributable - s_point$attributable
   spread    <- interval(nh_sim$attributable - s_sim$attributable)
-  
+
   scenarios <- rbind(scenarios, data.frame(
     scenario         = s,
     episodes         = round(s_point$n_exposed),
@@ -214,7 +219,7 @@ table1 <- data.frame(
   lower = 0,
   upper = 0)
 
-for (i in 1:14) {
+for (i in seq_len(nrow(table1))) {
   table1$lower[i] <- quantile(table1_draws[, i], 0.025)
   table1$upper[i] <- quantile(table1_draws[, i], 0.975)
 }
@@ -262,7 +267,7 @@ table2 <- data.frame(
   lower = 0,
   upper = 0)
 
-for (i in 1:10) {
+for (i in seq_len(nrow(table2))) {
   table2$lower[i] <- quantile(table2_draws[, i], 0.025)
   table2$upper[i] <- quantile(table2_draws[, i], 0.975)
 }
@@ -276,7 +281,7 @@ print(data.frame(quantity = table2$quantity,
 
 # Other coverage and effectiveness assumptions. Each workbook is
 # calibrated on its own natural history trials and compared with its
-# own nirsevimab trials. Never mix workbooks.
+# own nirsevimab trials.
 
 arms <- c("90% coverage"                 = "inputs_90pct.rds",
           "post-licensure effectiveness" = "inputs_postlicensure.rds")
@@ -284,32 +289,32 @@ arms <- c("90% coverage"                 = "inputs_90pct.rds",
 other_arms <- data.frame()
 
 for (arm in names(arms)) {
-  
+
   arm_inputs <- readRDS(arms[[arm]])$scenarios
-  
+
   arm_nh_point  <- unname(arm_inputs[["Natural History"]]$point)  * correction_point
   arm_nh_trials <- arm_inputs[["Natural History"]]$trials         * correction_trials
-  
+
   arm_cal_point <- prevalence_unexposed(effects$odds_ratio[1], prev_total,
                                         arm_nh_point / pop_total)
   arm_cal_sim   <- prevalence_unexposed(odds_draws, prev_total_trials,
                                         arm_nh_trials / pop_total)
-  
+
   arm_nh_out  <- outcomes(arm_nh_point, pop_total,
                           arm_cal_point$p0, arm_cal_point$risk_ratio)
   arm_nh_sim  <- outcomes(arm_nh_trials, pop_total,
                           arm_cal_sim$p0, arm_cal_sim$risk_ratio)
-  
+
   arm_nir_out <- outcomes(unname(arm_inputs[["Nirsevimab"]]$point) * correction_point,
                           pop_total, arm_cal_point$p0, arm_cal_point$risk_ratio)
   arm_nir_sim <- outcomes(arm_inputs[["Nirsevimab"]]$trials * correction_trials,
                           pop_total, arm_cal_sim$p0, arm_cal_sim$risk_ratio)
-  
+
   prevented     <- arm_nh_out$attributable - arm_nir_out$attributable
   prevented_sim <- arm_nh_sim$attributable - arm_nir_sim$attributable
   pct_attrib    <- 100 * prevented_sim / arm_nh_sim$attributable
   pct_all       <- 100 * prevented_sim / arm_nh_sim$asthma_total
-  
+
   other_arms <- rbind(other_arms, data.frame(
     arm              = arm,
     prevented        = round(prevented),
@@ -357,7 +362,8 @@ cat("attributable fraction", round(100 * narrow_base$attributable_fraction, 1),
 odds_ratio <- effects$odds_ratio[1]
 low_high   <- list(
   "odds ratio"        = c(effects$lower[1], effects$upper[1]),
-  "RSV LRTI episodes" = unname(quantile(n_exposed_trials, c(0.025, 0.975))),
+  "RSV LRTI encounters" =
+    correction_point * unname(quantile(encounters$trials, c(0.025, 0.975))),
   "prevalence anchor" = c(prev_total_lower, prev_total_upper),
   "encounter-to-episode correction" =
     unname(encounters$point) * unname(quantile(correction_trials, c(0.025, 0.975))))
@@ -365,19 +371,19 @@ low_high   <- list(
 tornado <- data.frame()
 
 for (input in names(low_high)) {
-  
+
   or   <- c(odds_ratio, odds_ratio)
   nex  <- c(n_exposed_point, n_exposed_point)
   prev <- c(prev_total, prev_total)
-  
+
   if (input == "odds ratio")        or   <- low_high[[input]]
-  if (input == "RSV LRTI episodes") nex  <- low_high[[input]]
+  if (input == "RSV LRTI encounters") nex  <- low_high[[input]]
   if (input == "prevalence anchor") prev <- low_high[[input]]
   if (input == "encounter-to-episode correction") nex <- low_high[[input]]
-  
+
   cal <- prevalence_unexposed(or, prev, nex / pop_total)
   out <- outcomes(nex, pop_total, cal$p0, cal$risk_ratio)
-  
+
   tornado <- rbind(tornado, data.frame(
     input = input,
     low   = round(100 * out$attributable_fraction[1], 1),
