@@ -1,11 +1,16 @@
-# compare_calibrations.R
-#
-# Prints the base case both ways: as the original analysis computed
-# prevalence in unexposed children, and as the Methods describes it.
-#
-# Run this file on its own. It changes nothing.
+# Compares the two-pass and closed-form calibrations at the same
+# base-case inputs.
 
 source("rsv_asthma_model.R")
+
+# Two-pass calculation of prevalence in unexposed children.
+prevalence_unexposed_two_pass <- function(odds_ratio, prev_total,
+                                          p_exposed) {
+  start      <- prev_total / (odds_ratio * p_exposed + (1 - p_exposed))
+  risk_ratio <- odds_ratio / ((1 - start) + start * odds_ratio)
+  p0         <- prev_total / (risk_ratio * p_exposed + (1 - p_exposed))
+  list(p0 = p0, p1 = p0 * risk_ratio, risk_ratio = risk_ratio)
+}
 
 pop_total  <- 3664292
 prev_total <- 0.088
@@ -19,11 +24,11 @@ correction <- 0.491 / (0.491 + 0.374) * 69068  / 107338 +
 n_natural    <- unname(inputs$scenarios[["Natural History"]]$point) * correction
 n_nirsevimab <- unname(inputs$scenarios[["Nirsevimab"]]$point)      * correction
 
-for (method in c("published", "closed form")) {
+for (method in c("two-pass", "closed form")) {
 
-  p <- if (method == "published")
-         prevalence_unexposed_published(odds_ratio, prev_total,
-                                        n_natural / pop_total)
+  p <- if (method == "two-pass")
+         prevalence_unexposed_two_pass(odds_ratio, prev_total,
+                                       n_natural / pop_total)
        else
          prevalence_unexposed(odds_ratio, prev_total,
                               n_natural / pop_total)
