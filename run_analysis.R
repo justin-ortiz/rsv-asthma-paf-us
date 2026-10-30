@@ -12,7 +12,7 @@ input_cache <- "inputs.rds"
 
 pop_total <- 3664292          # NCHS 2021 births
 
-prev_total       <- 0.088     # NHIS 2018-2021, asthma at age 6
+prev_total       <- 0.088     # NHIS 2018-2021, asthma, ages 5-11
 prev_total_lower <- 0.081
 prev_total_upper <- 0.096
 
