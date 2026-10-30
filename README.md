@@ -8,6 +8,8 @@ infection in the United States.
     cache_inputs.R            reads an incidence workbook, writes an .rds file
     run_analysis.R            assumptions and analysis
     compare_calibrations.R    compares the two-pass and closed-form calibrations
+    make_figure1.R            draws Figure 1 from the results files
+    make_figure2.R            draws Figure 2 from the results files
 
 ## Data
 
@@ -40,6 +42,9 @@ file name.
 
 6. Run `run_analysis.R`. It prints the results and writes seven CSV files
    to the working folder. A new run overwrites them. The files in this repository are the results we report.
+7. Run `make_figure1.R` and `make_figure2.R`. Each reads the results
+   files from the working folder and writes its figure as a PDF file and
+   a PNG file, such as `Figure1.pdf` and `Figure1.png`.
 
 Assumptions sit at the top of `run_analysis.R`. To add an effect
 estimate, add a row to the `effects` table.
