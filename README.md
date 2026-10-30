@@ -38,10 +38,8 @@ file name.
         50% coverage, post-licensure       inputs_postlicensure.rds
         90% coverage, base waning          inputs_90pct.rds
 
-6. Run `run_analysis.R`. It prints the results and writes six CSV files
+6. Run `run_analysis.R`. It prints the results and writes seven CSV files
    to the working folder. A new run overwrites them. The files in this repository are the results we report.
-
-The narrow case definition result is printed but not saved.
 
 Assumptions sit at the top of `run_analysis.R`. To add an effect
 estimate, add a row to the `effects` table.
