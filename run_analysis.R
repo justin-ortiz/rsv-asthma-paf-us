@@ -349,11 +349,27 @@ narrow_sim <- outcomes(narrow_trials, pop_total,
 
 narrow_fraction <- interval(100 * narrow_sim$attributable_fraction)
 
+# Attributable cases under the narrow definition. The Results report
+# this count beside the attributable fraction.
+narrow_cases <- interval(narrow_sim$attributable)
+
 cat("\nNARROW CASE DEFINITION\n\n")
 cat("correction factor", round(100 * correction_point_narrow, 1), "%\n")
 cat("attributable fraction", round(100 * narrow_base$attributable_fraction, 1),
     "% (", round(narrow_fraction["lower"], 1), "to",
     round(narrow_fraction["upper"], 1), ")\n")
+cat("attributable cases", round(narrow_base$attributable),
+    "(", round(narrow_cases["lower"]), "to",
+    round(narrow_cases["upper"]), ")\n")
+
+narrow <- data.frame(
+  correction_factor = round(100 * correction_point_narrow, 1),
+  fraction          = round(100 * narrow_base$attributable_fraction, 2),
+  fraction_lower    = round(narrow_fraction["lower"], 1),
+  fraction_upper    = round(narrow_fraction["upper"], 1),
+  cases             = round(narrow_base$attributable),
+  cases_lower       = round(narrow_cases["lower"]),
+  cases_upper       = round(narrow_cases["upper"]))
 
 
 # One-way sensitivity on the base case odds ratio. Each input moves to
@@ -405,3 +421,4 @@ write.csv(tornado,   "results_one_way.csv",          row.names = FALSE)
 write.csv(table1,    "results_table1.csv",           row.names = FALSE)
 write.csv(table2,    "results_table2.csv",           row.names = FALSE)
 write.csv(other_arms, "results_other_arms.csv",      row.names = FALSE)
+write.csv(narrow,     "results_narrow.csv",          row.names = FALSE)
